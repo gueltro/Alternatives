@@ -1,0 +1,2 @@
+add_executable(Tests_run BoxTests.cpp)
+target_link_libraries(Tests_run CompileTimeAlternatives)
