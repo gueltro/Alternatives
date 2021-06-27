@@ -133,6 +133,29 @@ namespace boxes {
         CHECK(y == 1);
     }
 
+    struct MyFunctorPeek {
+        int operator()(const A& a){
+            return 0;
+        }
+
+        int operator()(const B& b) {
+            return 1;
+        }
+    };
+
+    TEST_CASE("BoxedFunctorPeek") {
+        Box<A,B> either_a = A{};
+        int x = either_a
+                .Peek(MyFunctorPeek{});
+
+        Box<A,B> either_b = B{};
+        int y = either_b
+                .Peek(MyFunctorPeek{});
+
+        CHECK(x == 0);
+        CHECK(y == 1);
+    }
+
     struct MyStatefulFunctor {
         MyStatefulFunctor(int x) : x_(x) {}
 
@@ -182,6 +205,22 @@ namespace boxes {
         CHECK(x == 1);
     }
 
+    struct ValueFuncPeek {
+        template<uint8_t v>
+        int operator()(const MyRange<v>& value) {
+            return v;
+        }
+    };
+
+    TEST_CASE("EitherValuePeek") {
+        auto v = MyRange<1>::make();
+        BoxedMyRange bv(v);
+
+        auto x = bv.Peek(ValueFuncPeek{});
+
+        CHECK(x == 1);
+    }
+
     TEST_CASE("EitherValueAtRuntime") {
         auto box_or_error = BoxedMyRangeMaker::make(1);
         std::move(box_or_error).Unbox(
@@ -213,6 +252,21 @@ namespace boxes {
 
         int v  = std::move(b)
                 .Unbox(ValueInRangeFunc{});
+        CHECK(v == 1);
+    }
+
+    struct ValueInRangeFuncPeek {
+        template<int v>
+        int operator()(const MyConsecutiveRange<v>& value) {
+            return v;
+        }
+    };
+
+    TEST_CASE("EitherValueInRangePeek") {
+        auto x= MyConsecutiveRange<1>::make();
+        MyConsecutiveRangeBoxed b(x);
+
+        int v  = b.Peek(ValueInRangeFunc{});
         CHECK(v == 1);
     }
 

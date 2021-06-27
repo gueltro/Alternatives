@@ -29,6 +29,14 @@ namespace boxes {
                     std::move(value_));
         }
 
+        // Expose a reference to the boxed value to a  variadic packs of functors.
+        template<typename... FS>
+        constexpr auto Peek(FS&&... fs) const {
+            return std::visit(
+                    internal::overloaded_stateful<FS...>(std::forward<FS>(fs)...),
+                    value_);
+        }
+
     private:
         std::variant<Alternatives...> value_;
     };
